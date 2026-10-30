@@ -1,1 +1,801 @@
 
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>FantaBike</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800;1,900&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: phone-first race app — dark "asphalt" header band with road dashes, white stage cards, bottom tab bar; jerseys and profiles drawn in SVG */
+:root{
+  --bg:#eceff3;--surface:#ffffff;--surface2:#f5f7fa;--ink:#10151f;--muted:#5b6474;--line:rgba(16,21,31,.10);
+  --road:#151b27;--road2:#232c3c;--onroad:#f3f5f8;--dash:#ffd400;
+  --green:#0a9a55;--kom:#e2231a;--white-j:#fbfbfd;
+  --lead:#d6001c;--lead-ink:#ffffff;--lead-soft:rgba(214,0,28,.12);
+  --sky1:#cfe3f5;--sky2:#f3f7fb;--hill:#c9d3df;--hill2:#9fb0c4;
+  --display:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a0e15;--surface:#141a25;--surface2:#1a2130;--ink:#edf1f7;--muted:#8f99ab;--line:rgba(255,255,255,.09);
+  --road:#05080d;--road2:#121926;--onroad:#f3f5f8;--sky1:#1b2a3d;--sky2:#141c29;--hill:#2a3648;--hill2:#3b4a60;--white-j:#f1f2f6;
+  --lead-soft:rgba(255,60,80,.16);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a0e15;--surface:#141a25;--surface2:#1a2130;--ink:#edf1f7;--muted:#8f99ab;--line:rgba(255,255,255,.09);
+  --road:#05080d;--road2:#121926;--onroad:#f3f5f8;--sky1:#1b2a3d;--sky2:#141c29;--hill:#2a3648;--hill2:#3b4a60;--white-j:#f1f2f6;
+  --lead-soft:rgba(255,60,80,.16);color-scheme:dark}
+:root[data-race="tour"]{--lead:#ffd200;--lead-ink:#111111;--lead-soft:rgba(255,210,0,.22);--dash:#ffffff}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--road);z-index:30}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--lead);outline-offset:2px;border-radius:8px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);font-weight:800;font-style:italic;letter-spacing:.2px;margin:0;text-wrap:balance;line-height:1}
+.app{max-width:560px;margin:0 auto;min-height:100%;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+/* header band */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--road);color:var(--onroad);
+  padding-block:10px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top::after{content:"";display:block;height:4px;margin:10px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;
+  background:repeating-linear-gradient(90deg,var(--dash) 0 22px,transparent 22px 40px);opacity:.9}
+.bar{display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;letter-spacing:.3px;line-height:1}
+.logo i{color:var(--lead);font-style:italic}
+:root[data-race="tour"] .logo i{color:var(--lead)}
+.logo svg{width:30px;height:30px;flex:none}
+.sp{flex:1}
+.seg{display:inline-flex;background:var(--road2);border-radius:999px;padding:3px;gap:2px}
+.seg button{font:700 12px/1 var(--body);letter-spacing:.6px;text-transform:uppercase;padding:7px 10px;border-radius:999px;color:#aab4c4}
+.seg button[aria-pressed="true"]{background:var(--onroad);color:#10151f}
+.race-sw{margin-top:10px;display:flex;gap:8px}
+.race-sw button{flex:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:var(--road2);color:#c5ceda;text-align:left}
+.race-sw button[aria-pressed="true"]{background:var(--onroad);color:#10151f}
+.race-sw b{font-family:var(--display);font-style:italic;font-weight:800;font-size:18px;line-height:1;display:block}
+.race-sw small{font-size:11px;opacity:.75;display:block}
+.race-sw svg{width:28px;height:28px;flex:none}
+
+/* page */
+.pg>*{min-width:0}
+.pg{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 8px;display:grid;gap:18px}
+.eyebrow{font:700 11px/1 var(--body);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sec-h h2{font-size:26px}
+.sec-h .eyebrow{white-space:nowrap}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:0 1px 0 var(--line),0 6px 18px -12px rgba(10,20,40,.35)}
+.muted{color:var(--muted)}
+
+/* hero stage */
+.hero{overflow:hidden;position:relative}
+.hero .hd{padding:14px 16px 0;display:flex;gap:10px;align-items:flex-start}
+.hero .stg{background:var(--lead);color:var(--lead-ink);font-family:var(--display);font-style:italic;font-weight:900;border-radius:10px;padding:6px 9px 4px;text-align:center;line-height:.9;flex:none}
+.hero .stg small{display:block;font-size:10px;letter-spacing:1px;font-style:normal;font-weight:700}
+.hero .stg b{font-size:30px}
+.hero h1{font-size:30px}
+.hero h1 .arr{color:var(--lead);padding:0 4px}
+:root[data-race="tour"] .hero h1 .arr{color:#c9a400}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;font:600 12px/1 var(--body);padding:5px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.k{background:var(--lead-soft);color:var(--ink)}
+.prof{display:block;width:100%;height:auto;margin-top:6px}
+.hero .win{display:flex;align-items:center;gap:12px;padding:12px 16px 14px;border-top:1px dashed var(--line)}
+.win{flex-wrap:wrap}.win .t{flex:1;min-width:0}
+.win b{font-family:var(--display);font-style:italic;font-weight:800;font-size:20px;line-height:1}
+
+/* jerseys row */
+.jrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.jc{padding:12px 8px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.jc svg{width:72px;height:72px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.18))}
+.jc .lbl{font:700 10px/1 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.jc .who{font-family:var(--display);font-style:italic;font-weight:800;font-size:20px;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jc .val{font:600 12px/1.2 var(--mono)}
+
+/* road progress */
+.road{padding:14px 14px 12px}
+.road svg{display:block;width:100%;height:auto}
+
+/* podium */
+.podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:8px;padding:16px 12px 0}
+.pod{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.pod svg.j{width:58px;height:58px}
+.pod .n{font-family:var(--display);font-style:italic;font-weight:800;font-size:18px;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .g{font:500 11px/1 var(--mono);color:var(--muted)}
+.step{width:100%;border-radius:10px 10px 0 0;display:grid;place-items:center;font-family:var(--display);font-style:italic;font-weight:900;font-size:34px;color:var(--lead-ink);background:var(--lead)}
+.pod:nth-child(1) .step{height:58px;background:#9aa6b6;color:#fff}
+.pod:nth-child(2) .step{height:84px}
+.pod:nth-child(3) .step{height:44px;background:#b9773f;color:#fff}
+
+/* standings list */
+.tabsJ{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tabsJ button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 8px;border-radius:12px;background:var(--surface);box-shadow:0 1px 0 var(--line)}
+.tabsJ button svg{width:44px;height:44px}
+.tabsJ button span{font:700 11px/1 var(--body);letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.tabsJ button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:-2px}
+.lead-b{display:flex;align-items:center;gap:14px;padding:14px 16px;color:var(--lead-ink);background:var(--lead);border-radius:var(--r);position:relative;overflow:hidden}
+.lead-b.verde{background:var(--green);color:#fff}
+.lead-b.pois{background:var(--white-j);color:#10151f;background-image:radial-gradient(circle,var(--kom) 0 7px,transparent 7.5px);background-size:30px 30px;background-position:6px 4px}
+.lead-b.pois .t{background:var(--white-j);border-radius:10px;padding:6px 10px}
+.lead-b svg{width:84px;height:84px;flex:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))}
+.lead-b .t{min-width:0}
+.lead-b h3{font-size:32px}
+.lead-b .v{font:600 15px/1.2 var(--mono);margin-top:4px}
+.lst{list-style:none;margin:0;padding:6px 0}
+.lst li{display:grid;grid-template-columns:30px 36px 1fr auto;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line)}
+.lst li:first-child{border-top:0}
+.lst .pos{font-family:var(--display);font-style:italic;font-weight:900;font-size:24px;text-align:center;line-height:1}
+.lst svg.j{width:36px;height:36px}
+.lst .nm{min-width:0}
+.lst .nm b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lst .nm small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lst .r{text-align:right;font:600 13px/1.25 var(--mono)}
+.lst .r small{display:block;font:500 11px/1.2 var(--mono);color:var(--muted)}
+.mv{font:700 11px/1 var(--body);display:inline-block;min-width:24px}
+.mv.up{color:var(--green)}.mv.dn{color:var(--kom)}.mv.eq{color:var(--muted)}
+.lst li.tap{cursor:pointer}
+.lst li.tap:hover{background:var(--surface2)}
+
+/* bump chart */
+.chart{padding:12px 6px 8px}
+.chart .wrap{overflow-x:auto}
+.chart svg{display:block;min-width:520px;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px;padding:4px 10px 6px}
+.legend button{display:inline-flex;align-items:center;gap:5px;font:600 12px/1 var(--body);padding:5px 8px;border-radius:999px;background:var(--surface2)}
+.legend button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+/* stages */
+.strip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity;margin:0 -2px}
+.strip button{flex:none;width:74px;scroll-snap-align:center;background:var(--surface);border-radius:12px;padding:8px 6px 6px;box-shadow:0 1px 0 var(--line);display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.strip button b{font-family:var(--display);font-style:italic;font-weight:900;font-size:22px;line-height:1}
+.strip button small{font:600 10px/1 var(--body);color:var(--muted);letter-spacing:.4px}
+.strip button svg{width:60px;height:22px}
+.strip button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.strip button[aria-pressed="true"] small{color:inherit;opacity:.7}
+.strip button .dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--green)}
+.strip button .dot.fut{background:var(--line)}
+.strip button .dot.neu{background:#f0a500}
+.note{padding:12px 14px;border-radius:12px;background:var(--surface2);color:var(--muted);font-size:13.5px}
+.res li{grid-template-columns:30px 1fr auto}
+.res .ln{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:2px}
+.res .rider{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.res .rider svg{width:18px;height:18px}
+.tag{font:700 10px/1 var(--body);letter-spacing:.6px;padding:3px 5px;border-radius:5px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.tag.g{background:rgba(10,154,85,.14);color:var(--green)}
+.tag.k{background:rgba(226,35,26,.12);color:var(--kom)}
+.tag.b{background:var(--lead-soft);color:var(--ink)}
+
+/* teams */
+.teams{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tm{padding:12px;display:flex;flex-direction:column;gap:6px;text-align:left;position:relative;overflow:hidden}
+.tm svg.j{width:64px;height:64px;position:absolute;right:-4px;top:6px;opacity:.95}
+.tm .rk{font-family:var(--display);font-style:italic;font-weight:900;font-size:30px;line-height:1}
+.tm b{font-family:var(--display);font-style:italic;font-weight:800;font-size:19px;line-height:1.05;padding-right:52px}
+.tm small{color:var(--muted);font-size:12px;padding-right:52px}
+.tm .ic{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.tm .ic span{font:600 11px/1 var(--mono);padding:4px 6px;border-radius:6px;background:var(--surface2)}
+
+/* sheet */
+.ov{position:fixed;inset:0;background:rgba(5,8,13,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-width:560px;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;max-height:88%;overflow:auto;transform:translateY(102%);transition:transform .25s ease;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet{visibility:hidden}.sheet.on{transform:none;visibility:visible}
+.sheet .grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:8px auto}
+.sh-hd{display:flex;gap:14px;align-items:center;padding:6px 16px 14px}
+.sh-hd svg{width:96px;height:96px;flex:none}
+.sh-hd h2{font-size:30px}
+.sh-body{padding:0 16px;display:grid;gap:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{padding:10px;text-align:center}
+.stat svg{width:30px;height:30px}
+.stat b{display:block;font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;line-height:1}
+.stat small{font:500 11px/1.2 var(--mono);color:var(--muted)}
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pk{padding:7px 8px;border-radius:10px;background:var(--surface);box-shadow:0 1px 0 var(--line);min-width:0}
+.pk small{font:700 10px/1 var(--body);color:var(--muted);letter-spacing:.6px}
+.pk b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk .p{font:500 11px/1 var(--mono);color:var(--muted)}
+.pk.best{background:var(--lead);color:var(--lead-ink)}
+.pk.best small,.pk.best .p{color:inherit;opacity:.8}
+.close{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:12px;width:34px;height:34px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:18px}
+
+/* rules */
+.rules{padding:16px;display:grid;gap:14px}
+.rule{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start}
+.rule svg{width:52px;height:52px}
+.rule h3{font-size:21px;margin-bottom:3px}
+.rule p{margin:0;color:var(--muted);font-size:14px;max-width:60ch}
+.formula{font:600 13px/1.4 var(--mono);background:var(--surface2);padding:10px 12px;border-radius:10px;overflow-x:auto}
+
+/* countdown */
+.cd{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
+.cd div{background:var(--surface2);border-radius:12px;padding:10px;text-align:center}
+.cd b{display:block;font-family:var(--display);font-style:italic;font-weight:900;font-size:34px;line-height:1}
+.cd small{font:700 10px/1 var(--body);letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+
+/* pick */
+.me{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.me svg.j{width:52px;height:52px;flex:none}
+.me .t{flex:1;min-width:0}
+.me b{font-family:var(--display);font-style:italic;font-weight:800;font-size:22px;line-height:1;display:block}
+.lnk{font:600 12px/1 var(--body);color:var(--muted);text-decoration:underline;padding:6px}
+.tm[disabled]{opacity:.45;cursor:not-allowed}
+.tm .tk{font:700 10px/1 var(--body);letter-spacing:.8px;text-transform:uppercase;color:var(--kom)}
+.pf{padding:14px 16px 16px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;border-top:1px dashed var(--line)}
+.pf label{font:700 11px/1 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.pf .row{display:flex;gap:8px}
+.pf input{flex:1;min-width:0;font:600 17px/1.2 var(--body);padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface2);color:var(--ink)}
+.pf input:focus{outline:none;border-color:var(--ink)}
+.btn{font:800 15px/1 var(--display);font-style:italic;letter-spacing:.4px;text-transform:uppercase;padding:12px 16px;border-radius:12px;background:var(--lead);color:var(--lead-ink);white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.ghost{background:var(--surface2);color:var(--ink)}
+.msg{font-size:13.5px;padding:8px 10px;border-radius:10px}
+.msg.ok{background:rgba(10,154,85,.12);color:var(--green)}
+.msg.err{background:rgba(226,35,26,.10);color:var(--kom)}
+.cur{display:flex;align-items:center;gap:8px;font-size:14px}
+.cur b{font-size:16px}
+.used{display:flex;flex-wrap:wrap;gap:6px}
+.used span{font:600 12px/1 var(--body);padding:6px 8px;border-radius:8px;background:var(--surface);box-shadow:0 1px 0 var(--line)}
+.used small{color:var(--muted);font:600 10px/1 var(--mono);margin-right:4px}
+.strip button .ck{position:absolute;top:5px;left:6px;font:900 11px/1 var(--body);color:var(--green)}
+.qbtn{width:30px;height:30px;border-radius:50%;background:var(--road2);color:#c5ceda;font:800 15px/1 var(--body);display:grid;place-items:center}
+.qbtn[aria-pressed="true"]{background:var(--onroad);color:#10151f}
+.chosen{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
+.chosen span{display:inline-flex;align-items:center;gap:4px;font:600 12px/1 var(--body);padding:4px 8px 4px 4px;border-radius:999px;background:var(--surface2)}
+.chosen span svg{width:20px;height:20px}
+.chosen span.no{opacity:.4}
+
+.rgrid{display:grid;grid-template-columns:minmax(70px,1.4fr) 1.3fr repeat(4,minmax(34px,.8fr)) 26px;gap:6px;align-items:center;overflow-x:auto}
+.rgrid small{font:700 9px/1.1 var(--body);letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.rgrid b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rgrid input{min-width:0;width:100%;font:600 13px/1 var(--mono);padding:8px 6px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);color:var(--ink)}
+.rgrid input[type=checkbox]{width:20px;height:20px;padding:0}
+/* tab bar */
+.tb{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tb div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tb button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 10px;font:600 10.5px/1 var(--body);letter-spacing:.3px;color:var(--muted);position:relative}
+.tb button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tb button[aria-current="page"]{color:var(--ink)}
+.tb button[aria-current="page"]::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--lead)}
+:root[data-race="tour"] .tb button[aria-current="page"]::before{background:#e8bd00}
+
+.fade{animation:fd .28s ease both}
+@keyframes fd{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes ride{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.rider-anim{animation:ride 1.2s ease-in-out infinite alternate}
+@media (prefers-reduced-motion:reduce){.fade,.rider-anim{animation:none}.sheet,.ov{transition:none}}
+@media (min-width:430px){.hero h1{font-size:34px}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="bar">
+      <div class="logo" aria-label="FantaBike"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="20" cy="20" r="4" fill="var(--lead)"/><g stroke="currentColor" stroke-width="1.4" opacity=".7"><path d="M20 3v34M3 20h34M8 8l24 24M32 8L8 32"/></g><circle cx="20" cy="20" r="4" fill="var(--lead)"/></svg><span>Fanta<i>Bike</i></span></div>
+      <div class="sp"></div>
+      <button class="qbtn" id="qb" data-tab="rules" aria-label="Regole">?</button><div class="seg" role="group" aria-label="Lingua / Idioma"><button id="l-it" data-l="it">IT</button><button id="l-es" data-l="es">ES</button></div>
+    </div>
+    <div class="race-sw" id="racesw"></div>
+  </header>
+  <main class="pg" id="m"></main>
+</div>
+<nav class="tb" aria-label="Menu"><div id="tb"></div></nav>
+<div class="ov" id="ov"></div><datalist id="riders"></datalist>
+<div class="sheet" id="sh" role="dialog" aria-modal="true"></div>
+
+<script>
+const VUELTA_DATA={"dts":[{"n":"Teo","t":"E.P.O."},{"n":"Ricky","t":"Team Regigaard"},{"n":"Tommy","t":"Cul de Sac"},{"n":"Ale B.","t":"0.6"},{"n":"Giuanin","t":"Locomotora de Lambrate"},{"n":"Umbo","t":"Jumbo il Grigio"},{"n":"Ric Spada","t":"Crisi di Fame"},{"n":"Ale Roc","t":"Carlien Daten"},{"n":"Luca e Franci","t":"TiciTrek"},{"n":"Tancredi","t":"Liquigaz"}],"res":[{"Ale B.":["Tarling",661,0,0,15,0],"Ale Roc":["Tarling",661,0,0,15,0],"Giuanin":["Tarling",661,0,0,15,0],"Luca e Franci":["Tarling",661,0,0,15,0],"Ric Spada":["Tarling",661,0,0,15,0],"Ricky":["Tarling",661,0,0,15,0],"Tancredi":["Tarling",661,0,0,15,0],"Teo":["Tarling",661,0,0,15,0],"Tommy":["Tarling",661,0,0,15,0],"Umbo":["Tarling",661,0,0,15,0]},{"Ale B.":["Aular",17267,0,0,7,0],"Ale Roc":["Van Aert",17267,4,0,17,0],"Giuanin":["Aular",17267,0,0,7,0],"Luca e Franci":["Pedersen",17267,0,0,19,0],"Ric Spada":["Pedersen",17267,0,0,19,0],"Ricky":["Cort Nielsen",17567,0,0,0,0],"Tancredi":["Van Aert",17267,4,0,17,0],"Teo":["Van Aert",17267,4,0,17,0],"Tommy":["Aular",17267,0,0,7,0],"Umbo":["Fisher Black",17267,0,0,13,0]},{"Ale B.":["Gall",0,0,0,0,0],"Ale Roc":["Skjelmose",0,0,0,0,0],"Giuanin":["Onley",0,0,0,0,0],"Luca e Franci":["Onley",0,0,0,0,0],"Ric Spada":["Fisher Black",0,0,0,0,0],"Ricky":["Fisher Black",0,0,0,0,0],"Tancredi":["Onley",0,0,0,0,0],"Teo":["Vine",0,0,0,0,0],"Tommy":["Skjelmose",0,0,0,0,0],"Umbo":["Tejada",0,0,0,0,0]},{"Ale B.":["Fortunato",10460,0,0,0,10],"Ale Roc":["Johannesen",10410,0,0,0,0],"Giuanin":["Gall",9794,6,0,15,5],"Luca e Franci":["Skjelmose",9832,0,0,7,0],"Ric Spada":["Onley",9794,4,0,13,4],"Ricky":["Skjelmose",9832,0,0,7,0],"Tancredi":["Fortunato",10460,0,0,0,10],"Teo":["Johannesen",10410,0,0,0,0],"Tommy":["Gall",9794,6,0,15,5],"Umbo":["Vine",9852,0,0,5,0]},{"Ale B.":["Groves",14268,0,0,0,0],"Ale Roc":["Pau Miquel",13622,0,0,6,0],"Giuanin":["Van Aert",13622,0,0,24,0],"Luca e Franci":["Groves",14268,0,0,0,0],"Ric Spada":["Brennan",13622,10,0,30,0],"Ricky":["Brennan",13622,10,0,30,0],"Tancredi":["Pau Miquel",13622,0,0,6,0],"Teo":["Brennan",13622,10,0,30,0],"Tommy":["Pau Miquel",13622,0,0,6,0],"Umbo":["Van Aert",13622,0,0,24,0]},{"Ale B.":["Johannesen",15599,0,0,0,0],"Ale Roc":["Fortunato",16766,0,0,0,3],"Giuanin":["Johannesen",15599,0,0,0,0],"Luca e Franci":["Ivan Romeo",15956,0,0,0,0],"Ric Spada":["Johannesen",15599,0,0,0,0],"Ricky":["Johannesen",15599,0,0,0,0],"Tancredi":["Brenner",16399,0,0,0,0],"Teo":["Tullet",16399,0,0,0,0],"Tommy":["Ivan Romeo",15956,0,0,0,0],"Umbo":["Fortunato",16766,0,0,0,3]},{"Ale B.":["Cristian Rodriguez",14139,0,0,0,0],"Ale Roc":["Buitrago",14986,0,0,0,0],"Giuanin":["Kuss",14089,0,0,0,0],"Luca e Franci":["Roglic",14089,0,0,0,0],"Ric Spada":["Vine",14763,0,0,0,0],"Ricky":["Vine",14763,0,0,0,0],"Tancredi":["Tejada",14136,0,0,0,0],"Teo":["Cristian Rodriguez",14139,0,0,0,0],"Tommy":["Pablo Torres",14142,0,0,0,0],"Umbo":["Widar",14341,0,0,0,0]},{"Ale B.":["Brennan",13626,0,0,7,0],"Ale Roc":["Brennan",13626,0,0,7,0],"Giuanin":["Brennan",13626,0,0,7,0],"Luca e Franci":["Brennan",13626,0,0,7,0],"Ric Spada":["Aular",13626,0,0,9,0],"Ricky":["Albanese",13626,0,0,0,0],"Tancredi":["Albanese",13626,0,0,0,0],"Teo":["Meeus",13626,4,0,22,0],"Tommy":["Meeus",13626,4,0,22,0],"Umbo":["Meeus",13626,4,0,22,0]},{"Ale B.":["Vine",20761,0,0,0,0],"Ale Roc":["Mas",18640,10,0,20,10],"Giuanin":["Skjelmose",18660,0,0,10,0],"Luca e Franci":["Mas",18640,10,0,20,10],"Ric Spada":["Mas",18640,10,0,20,10],"Ricky":["Carapaz",18694,0,0,7,0],"Tancredi":["Kuss",18744,0,0,5,0],"Teo":["Gall",18658,0,0,13,2],"Tommy":["Kuss",18744,0,0,5,0],"Umbo":["Roglic",18652,4,0,15,4]},{"Ale B.":["Van Aert",14861,0,0,19,0],"Ale Roc":["Albanese",14861,0,0,6,0],"Giuanin":["Pedersen",15599,0,0,0,0],"Luca e Franci":["Coquard",14861,0,0,4,0],"Ric Spada":["Van Aert",14861,0,0,19,0],"Ricky":["Aular",14861,0,0,11,0],"Tancredi":["Lavik",15035,0,0,0,3],"Teo":["Coquard",14861,0,0,4,0],"Tommy":["Pedersen",15599,0,0,0,0],"Umbo":["Brennan",14941,0,0,0,0]},{"Ale B.":["Meeus",11838,4,0,20,0],"Ale Roc":["Coquard",11838,6,0,43,0],"Giuanin":["Coquard",11838,6,0,43,0],"Luca e Franci":["Meeus",11838,4,0,20,0],"Ric Spada":["Meeus",11838,4,0,20,0],"Ricky":["Meeus",11838,4,0,20,0],"Tancredi":["Brennan",11838,10,0,50,0],"Teo":["Nys",11838,0,0,0,0],"Tommy":["Romele",11838,0,0,20,0],"Umbo":["Coquard",11838,6,0,43,0]},{"Ale B.":["Buitrago",16326,10,0,15,21],"Ale Roc":["Zana",17747,0,0,0,0],"Giuanin":["Buitrago",16326,10,0,15,21],"Luca e Franci":["Gall",16396,0,0,9,0],"Ric Spada":["Gall",16396,0,0,9,0],"Ricky":["Onley",16498,0,0,4,0],"Tancredi":["Widar",17016,0,0,0,0],"Teo":["Onley",16498,0,0,4,0],"Tommy":["Carapaz",16396,0,0,7,0],"Umbo":["Kuss",16598,0,0,0,0]},{"Ale B.":["Romele",16722,0,0,0,0],"Ale Roc":["Romele",16722,0,0,0,0],"Giuanin":["Cort Nielsen",17020,0,0,0,0],"Luca e Franci":["Van Aert",16440,10,0,30,10],"Ric Spada":["Cort Nielsen",17020,0,0,0,0],"Ricky":["Van Aert",16440,10,0,30,10],"Tancredi":["Romele",16722,0,0,0,0],"Teo":["Laurance",16713,0,0,0,0],"Tommy":["Fisher Black",16464,0,0,15,0],"Umbo":["Cort Nielsen",17020,0,0,0,0]},{"Ale B.":["Mas",15561,0,0,0,0],"Ale Roc":["Gall",15561,0,0,0,0],"Giuanin":["Carapaz",15592,0,0,0,0],"Luca e Franci":["Carapaz",15592,0,0,0,0],"Ric Spada":["Carapaz",15592,0,0,0,0],"Ricky":["Gall",15561,0,0,0,0],"Tancredi":["Carapaz",15592,0,0,0,0],"Teo":["Mas",15561,0,0,0,0],"Tommy":["Omrzel",15636,0,0,0,0],"Umbo":["Carapaz",15592,0,0,0,0]},{"Ale B.":["Laurance",9752,0,0,0,0],"Ale Roc":["Cort Nielsen",9407,0,0,0,0],"Giuanin":["Albanese",10475,0,0,0,0],"Luca e Franci":["Widar",9869,0,0,0,0],"Ric Spada":["Dunbar",9358,0,0,4,0],"Ricky":["Bisiaux",9464,0,0,0,0],"Tancredi":["Cort Nielsen",9407,0,0,0,0],"Teo":["Cort Nielsen",9407,0,0,0,0],"Tommy":["Van Aert",9300,10,0,43,0],"Umbo":["Albanese",10475,0,0,0,0]},{"Ale B.":["Coquard",14193,6,0,25,0],"Ale Roc":["Meeus",14193,0,0,19,0],"Giuanin":["Meeus",14193,0,0,19,0],"Luca e Franci":["Nys",16089,0,0,0,0],"Ric Spada":["Coquard",14193,6,0,25,0],"Ricky":["Coquard",14193,6,0,25,0],"Tancredi":["Aular",14193,0,0,0,0],"Teo":["Vermaerke",14225,6,0,20,0],"Tommy":["Brennan",14193,10,0,30,0],"Umbo":["Govekar",14193,0,0,0,0]},{"Ale B.":["Albanese",14968,0,0,0,0],"Ale Roc":["Dainese",14835,0,0,6,0],"Giuanin":["Romele",14835,0,0,18,0],"Luca e Franci":["Albanese",14968,0,0,0,0],"Ric Spada":["Braet",14835,0,0,4,0],"Ricky":["Braet",14835,0,0,4,0],"Tancredi":["Meeus",14835,6,0,30,0],"Teo":["Albanese",14968,0,0,0,0],"Tommy":["Coquard",14835,2,0,22,0],"Umbo":["Braet",14835,0,0,4,0]},{"Ale B.":["Roglic",2141,0,0,13,0],"Ale Roc":["Hayter",2154,0,0,7,0],"Giuanin":["Roglic",2141,0,0,13,0],"Luca e Franci":["Hayter",2154,0,0,7,0],"Ric Spada":["Kung",2122,0,0,20,0],"Ricky":["Hayter",2154,0,0,7,0],"Tancredi":["Kung",2122,0,0,20,0],"Teo":["Kung",2122,0,0,20,0],"Tommy":["Hayter",2154,0,0,7,0],"Umbo":["Hayter",2154,0,0,7,0]},{"Ale B.":["Almeida",20107,0,0,0,0],"Ale Roc":["Carapaz",18379,0,0,3,0],"Giuanin":["Almeida",20107,0,0,0,0],"Luca e Franci":["Omrzel",18385,0,0,0,0],"Ric Spada":["Paret Peintre",19786,0,0,0,0],"Ricky":["Mas",18379,0,0,0,0],"Tancredi":["Buitrago",18068,6,0,17,9],"Teo":["Buitrago",18068,6,0,17,9],"Tommy":["Buitrago",18068,6,0,17,9],"Umbo":["Gall",18379,0,0,4,0]},{},{}]};
+
+/* ---------- races ---------- */
+const VST=[
+ [1,"2026-08-22","Monaco","Monaco",9,"itt",0],[2,"2026-08-23","Monaco","Manosque",215.2,"hilly",0],[3,"2026-08-24","Gruissan","Font-Romeu",166.7,"medium",1],
+ [4,"2026-08-25","Andorra la Vella","Andorra la Vella",104.9,"mountain",0],[5,"2026-08-26","Falset","Roquetes",171.1,"hilly",0],[6,"2026-08-27","Alcossebre","Castelló",176.8,"medium",0],
+ [7,"2026-08-28","Vall d'Alba","Valdelinares",149.9,"mountain",1],[8,"2026-08-29","Puçol","Xeraco",176.4,"flat",0],[9,"2026-08-30","Villajoyosa","Alto de Aitana",179.8,"mountain",1],
+ [10,"2026-09-01","Alcaraz","Elche de la Sierra",168.8,"hilly",0],[11,"2026-09-02","Cartagena","Lorca",170.2,"flat",0],[12,"2026-09-03","Vera","Calar Alto",166,"mountain",1],
+ [13,"2026-09-04","Almuñécar","Loja",193,"medium",0],[14,"2026-09-05","Jaén","Sierra de la Pandera",167,"mountain",1],[15,"2026-09-06","Palma del Río","Córdoba",175,"medium",0],
+ [16,"2026-09-08","Cortegana","Palos de la Frontera",162,"hilly",0],[17,"2026-09-09","Dos Hermanas","Sevilla",161,"flat",0],[18,"2026-09-10","El Puerto de Santa María","Jerez de la Frontera",32.5,"itt",0],
+ [19,"2026-09-11","Vélez-Málaga","Peñas Blancas",174,"hilly",1],[20,"2026-09-12","La Calahorra","Collado del Alguacil",194,"mountain",1],[21,"2026-09-13","Granada","Granada",167,"flat",0]];
+const TST=[
+ [1,"2027-07-02","Edinburgh","Carlisle",184,"flat",0],[2,"2027-07-03","Keswick","Liverpool",223,"hilly",0],[3,"2027-07-04","Welshpool","Cardiff",223,"hilly",0],
+ [4,"2027-07-06","Cherbourg","Cherbourg",171,"hilly",0],[5,"2027-07-07","Pontorson","Plumelec",178,"hilly",1],[6,"2027-07-08","Vannes","Angers",193,"hilly",0],
+ [7,"2027-07-09","Blois","Chambord",38,"itt",0],[8,"2027-07-10","Bourges","Le Creusot",224,"hilly",0],[9,"2027-07-11","Villars-les-Dombes","Grand Colombier",162,"mountain",1],
+ [10,"2027-07-13","Annecy","Sallanches",171,"mountain",0],[11,"2027-07-14","Cluses","Les Saisies",150,"mountain",1],[12,"2027-07-15","Chambéry","Valence",162,"flat",0],
+ [13,"2027-07-16","Aubenas","Montpellier",164,"flat",0],[14,"2027-07-17","Montpellier","Mende",199,"mountain",1],[15,"2027-07-18","Rodez","Albi",169,"hilly",0],
+ [16,"2027-07-20","Toulouse","Toulouse",33,"itt",0],[17,"2027-07-21","Muret","Pau",186,"flat",0],[18,"2027-07-22","Pau","Col du Portet",174,"mountain",1],
+ [19,"2027-07-23","Hasparren","Laruns",160,"mountain",0],[20,"2027-07-24","Maubourguet","Libourne",198,"flat",0],[21,"2027-07-25","Saint-Quentin-en-Yvelines","Paris",116,"flat",0]];
+const mk=a=>a.map(s=>({n:s[0],d:s[1],a:s[2],b:s[3],km:s[4],ty:s[5],top:!!s[6]}));
+const RACES={
+ vuelta:{id:"vuelta",name:"La Vuelta 2026",short:"Vuelta 26",sub:"22/08 – 13/09",lead:"rossa",stages:mk(VST),res:VUELTA_DATA.res,start:"2026-08-22",km:"3.275"},
+ tour:{id:"tour",name:"Tour de France 2027",short:"Tour 27",sub:"02/07 – 25/07",lead:"gialla",stages:mk(TST),res:[],start:"2027-07-02",km:"3.479"}
+};
+const DTS=VUELTA_DATA.dts;
+
+/* team jersey designs: [base, accent, pattern] */
+const KIT={"Tommy":["#1f6feb","#ffffff","sash"],"Ricky":["#111827","#ff4d6d","band"],"Teo":["#7c3aed","#fde047","split"],"Tancredi":["#0f766e","#f97316","hoops"],
+ "Ric Spada":["#ea580c","#1e293b","chev"],"Umbo":["#6b7280","#facc15","sleeves"],"Luca e Franci":["#e11d48","#ffffff","stripes"],"Giuanin":["#14532d","#a3e635","band"],
+ "Ale Roc":["#0ea5e9","#0b1220","chev"],"Ale B.":["#f5f5f4","#2563eb","sash"]};
+
+/* ---------- i18n ---------- */
+const T={
+ it:{home:"Corsa",cls:"Classifiche",stg:"Tappe",teams:"Squadre",rules:"Regole",stage:"Tappa",after:"Dopo la tappa",next:"Prossima",
+  rossa:"Maglia rossa",gialla:"Maglia gialla",verde:"Maglia verde",pois:"Maglia a pois",gen:"Generale",pts:"Punti",kom:"GPM",
+  leader:"Leader",gap:"Distacco",dayWin:"Miglior DS di giornata",with:"con",podium:"Podio generale",road:"Il cammino",
+  done:"tappe corse",left:"da correre",trend:"Andamento in classifica",trendSub:"Posizione in generale tappa per tappa",
+  all:"Tutti",picks:"Scelte tappa per tappa",best:"Miglior tappa",pos:"Pos.",points:"punti",
+  neutral:"Nessun tempo registrato in questa tappa: non cambia la classifica a tempi.",future:"Scelte e risultati non ancora caricati.",
+  bonus:"abbuono",pen:"penalità",total:"Tempo",rider:"Corridore",ds:"Direttore sportivo",team:"Squadra",
+  ty:{flat:"Pianura",hilly:"Mossa",medium:"Media montagna",mountain:"Montagna",itt:"Crono individuale"},
+  top:"arrivo in salita",days:"giorni",hours:"ore",min:"min",startsIn:"Partenza tra",grand:"Grande Partenza",
+  noRes:"La corsa non è ancora partita. Le classifiche si riempiono dopo la prima tappa.",
+  tapTeam:"Tocca una squadra per vedere le sue scelte",pick:"Scegli",who:"Chi sei?",whoSub:"Scegli il tuo direttore sportivo. Resta legato al tuo account.",taken:"già preso",change:"Cambia DS",
+  closesIn:"Chiusura scelte",yourPick:"Il tuo corridore",save:"Conferma",saved:"Scelta salvata",clear:"Rimuovi scelta",used:"Corridori già usati in questa corsa",
+  usedErr:"Hai già usato {r} nella tappa {n}. Scegli un altro corridore.",empty:"Scrivi il nome di un corridore.",
+  signin:"Per scegliere il tuo corridore devi aprire la pagina su claude.ai con un account che ha accesso. Le classifiche si vedono comunque.",
+  readonly:"Puoi vedere la pagina ma non salvare scelte: chiedi all'organizzatore l'accesso da Collaboratore.",
+  noOpen:"Nessuna tappa aperta in questa corsa: le scelte sono chiuse. Passa all'altra corsa per scegliere.",hidden:"nascosta",chose:"hanno già scelto",
+  revealed:"Scelte svelate · risultati in arrivo",loading:"Caricamento delle scelte…",ph:"Nome del corridore",lockNote:"Le scelte degli altri si vedono solo dopo la chiusura, alle 12:00 del giorno di tappa.",
+  saveErr:"Non è stato possibile salvare. Controlla la connessione e riprova.",none:"Nessuna scelta",goPick:"Scegli il corridore",takenErr:"Questo DS è già stato preso da un'altra persona.",nowPick:"Scelta attuale",noChoice:"senza scelta",retired:"ritirato",dupT:"Corridore ripetuto",editRes:"Modifica risultati",
+  resT:"Risultati della tappa",resSub:"Inserisci i dati dei corridori scelti dall'ordine d'arrivo ufficiale. Tempo h:mm:ss; abbuoni e penalità in secondi.",tArr:"Tempo",rit:"Rit.",
+  resSave:"Salva risultati",resSaved:"Risultati salvati: classifiche aggiornate.",fmtErr:"Tempo non valido per {r}: usa h:mm:ss oppure segna Rit.",
+  r5h:"Senza scelta o ritirato",r5:"Se non scegli entro la chiusura o il tuo corridore non arriva, prendi il tempo del DS più lento della tappa e zero punti.",stageWin:"vittorie di tappa",
+  rulesT:"Come funziona",
+  r1h:"Un corridore per tappa",r1:"Ogni direttore sportivo sceglie un solo corridore prima di ogni tappa. Lo stesso corridore non si può scegliere due volte in tutta la corsa.",
+  r2h:"Classifica generale",r2:"Il tempo d'arrivo del tuo corridore, meno gli abbuoni, più le eventuali penalità. Si sommano tutte le tappe: vince chi ha il tempo più basso.",
+  r3h:"Maglia verde",r3:"Si sommano i punti della classifica a punti presi dal tuo corridore in ogni tappa. Vince chi ne ha di più.",
+  r4h:"Maglia a pois",r4:"Si sommano i punti dei Gran Premi della Montagna presi dal tuo corridore. Vince chi ne ha di più.",
+  src:"Dati: file FANTA Vuelta 2026 (aggiornato alla tappa 19). Percorsi da fonti di stampa.",
+  of:"di",km:"km",leaderOf:"Leader",count:"Mancano",vs:"vs",noPick:"—"},
+ es:{home:"Carrera",cls:"Clasificaciones",stg:"Etapas",teams:"Equipos",rules:"Reglas",stage:"Etapa",after:"Tras la etapa",next:"Próxima",
+  rossa:"Maillot rojo",gialla:"Maillot amarillo",verde:"Maillot verde",pois:"Maillot de lunares",gen:"General",pts:"Puntos",kom:"Montaña",
+  leader:"Líder",gap:"Diferencia",dayWin:"Mejor director del día",with:"con",podium:"Podio general",road:"El camino",
+  done:"etapas corridas",left:"por correr",trend:"Evolución en la general",trendSub:"Posición en la general etapa por etapa",
+  all:"Todos",picks:"Elecciones etapa por etapa",best:"Mejor etapa",pos:"Pos.",points:"puntos",
+  neutral:"No hay tiempos registrados en esta etapa: no cambia la clasificación por tiempos.",future:"Elecciones y resultados aún no cargados.",
+  bonus:"bonificación",pen:"penalización",total:"Tiempo",rider:"Corredor",ds:"Director deportivo",team:"Equipo",
+  ty:{flat:"Llana",hilly:"Ondulada",medium:"Media montaña",mountain:"Montaña",itt:"Contrarreloj individual"},
+  top:"final en alto",days:"días",hours:"horas",min:"min",startsIn:"Salida en",grand:"Gran Salida",
+  noRes:"La carrera todavía no empezó. Las clasificaciones se llenan después de la primera etapa.",
+  tapTeam:"Toca un equipo para ver sus elecciones",pick:"Elegir",who:"¿Quién eres?",whoSub:"Elige tu director deportivo. Queda ligado a tu cuenta.",taken:"ya elegido",change:"Cambiar DD",
+  closesIn:"Cierre de elecciones",yourPick:"Tu corredor",save:"Confirmar",saved:"Elección guardada",clear:"Quitar elección",used:"Corredores ya usados en esta carrera",
+  usedErr:"Ya usaste a {r} en la etapa {n}. Elige otro corredor.",empty:"Escribe el nombre de un corredor.",
+  signin:"Para elegir tu corredor tienes que abrir la página en claude.ai con una cuenta que tenga acceso. Las clasificaciones se ven igual.",
+  readonly:"Puedes ver la página pero no guardar elecciones: pide al organizador acceso de Colaborador.",
+  noOpen:"No hay etapas abiertas en esta carrera: las elecciones están cerradas. Cambia a la otra carrera para elegir.",hidden:"oculta",chose:"ya eligieron",
+  revealed:"Elecciones reveladas · resultados por llegar",loading:"Cargando elecciones…",ph:"Nombre del corredor",lockNote:"Las elecciones de los demás se ven recién después del cierre, a las 12:00 del día de la etapa.",
+  saveErr:"No se pudo guardar. Revisa la conexión e inténtalo de nuevo.",none:"Sin elección",goPick:"Elegir corredor",takenErr:"Este DD ya lo eligió otra persona.",nowPick:"Elección actual",noChoice:"sin elección",retired:"retirado",dupT:"Corredor repetido",editRes:"Editar resultados",
+  resT:"Resultados de la etapa",resSub:"Carga los datos de los corredores elegidos según la clasificación oficial. Tiempo h:mm:ss; bonificaciones y penalizaciones en segundos.",tArr:"Tiempo",rit:"Ret.",
+  resSave:"Guardar resultados",resSaved:"Resultados guardados: clasificaciones actualizadas.",fmtErr:"Tiempo no válido para {r}: usa h:mm:ss o marca Ret.",
+  r5h:"Sin elección o retirado",r5:"Si no eliges antes del cierre o tu corredor no llega, recibes el tiempo del director más lento de la etapa y cero puntos.",stageWin:"victorias de etapa",
+  rulesT:"Cómo funciona",
+  r1h:"Un corredor por etapa",r1:"Cada director deportivo elige un solo corredor antes de cada etapa. No se puede repetir el mismo corredor en toda la carrera.",
+  r2h:"Clasificación general",r2:"El tiempo de llegada de tu corredor, menos las bonificaciones, más las penalizaciones. Se suman todas las etapas: gana el tiempo más bajo.",
+  r3h:"Maillot verde",r3:"Se suman los puntos de la clasificación por puntos que consigue tu corredor en cada etapa. Gana quien tenga más.",
+  r4h:"Maillot de lunares",r4:"Se suman los puntos de los premios de montaña que consigue tu corredor. Gana quien tenga más.",
+  src:"Datos: archivo FANTA Vuelta 2026 (actualizado a la etapa 19). Recorridos de fuentes de prensa.",
+  of:"de",km:"km",leaderOf:"Líder",count:"Faltan",vs:"vs",noPick:"—"}
+};
+
+/* ---------- state ---------- */
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let L=ls.get("fb-l")||"it", RID=ls.get("fb-r")||"vuelta", TAB="home", CJ="gen", SEL=null, HL=null;
+const t=k=>T[L][k];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- formatting ---------- */
+const hms=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h+":"+String(m).padStart(2,"0")+":"+String(x).padStart(2,"0")};
+const gcT=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h+"h "+String(m).padStart(2,"0")+"' "+String(x).padStart(2,"0")+'"'};
+const gapT=s=>{if(s<=0)return "—";s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return "+"+(h?h+"h ":"")+(h||m?String(m).padStart(h?2:1,"0")+"' ":"")+String(x).padStart(2,"0")+'"'};
+const dfmt=d=>{const x=new Date(d+"T12:00:00");return x.toLocaleDateString(L==="it"?"it-IT":"es-ES",{weekday:"short",day:"numeric",month:"short"})};
+
+/* ---------- compute ---------- */
+function compute(R){
+  const res=effRes(R), names=DTS.map(d=>d.n);
+  const st=R.stages.map((s,i)=>{const r=res[i];if(!r||!Object.keys(r).length)return"fut";return Object.values(r).some(v=>v[1]>0)?"ok":"neu"});
+  const last=st.lastIndexOf("ok")>=st.lastIndexOf("neu")?st.lastIndexOf("ok"):st.lastIndexOf("neu");
+  const cum={gen:[],verde:[],pois:[]}, rank={gen:[],verde:[],pois:[]};
+  const run={};names.forEach(n=>run[n]={t:0,g:0,p:0});
+  const day=[];
+  R.stages.forEach((s,i)=>{
+    const r=res[i]||{};const rows=[];
+    names.forEach(n=>{const v=r[n];if(!v)return;const tot=v[1]-v[2]+v[3];run[n].t+=tot;run[n].g+=v[4];run[n].p+=v[5];rows.push({n,rd:v[0],t:v[1],b:v[2],pe:v[3],tot,g:v[4],k:v[5],f:v[6]||""})});
+    if(st[i]==="ok"){rows.sort((a,b)=>a.tot-b.tot);rows.forEach((x,j)=>x.gap=x.tot-rows[0].tot)}
+    day.push(rows);
+    const snap=n=>({...run[n]});
+    cum.gen.push(Object.fromEntries(names.map(n=>[n,snap(n)])));
+    if(st[i]!=="fut"){
+      rank.gen[i]=ranker(names,n=>run[n].t,1);rank.verde[i]=ranker(names,n=>run[n].g,-1);rank.pois[i]=ranker(names,n=>run[n].p,-1);
+    }
+  });
+  const totals=last>=0?cum.gen[last]:Object.fromEntries(names.map(n=>[n,{t:0,g:0,p:0}]));
+  // stage wins per DT
+  const wins={};names.forEach(n=>wins[n]=0);
+  day.forEach((rows,i)=>{if(st[i]!=="ok")return;rows.filter(x=>x.gap===0).forEach(x=>wins[x.n]++)});
+  return {st,last,day,cum,rank,totals,wins};
+}
+function ranker(names,f,dir){const s=[...names].sort((a,b)=>dir*(f(a)-f(b))||a.localeCompare(b));const o={};let p=0,prev=null;s.forEach((n,i)=>{const v=f(n);if(v!==prev){p=i+1;prev=v}o[n]=p});return o}
+function standing(C,j,idx){
+  const i=idx??C.last; if(i<0)return DTS.map(d=>({n:d.n,v:0,pos:"–"}));
+  const tot=C.cum.gen[i], key={gen:"t",verde:"g",pois:"p"}[j], dir=j==="gen"?1:-1;
+  const rk=C.rank[j][i];
+  const prevI=(()=>{for(let k=i-1;k>=0;k--)if(C.rank[j][k])return k;return -1})();
+  return DTS.map(d=>({n:d.n,v:tot[d.n][key],pos:rk[d.n],mv:prevI>=0?C.rank[j][prevI][d.n]-rk[d.n]:0})).sort((a,b)=>a.pos-b.pos||a.n.localeCompare(b.n));
+}
+
+/* ---------- illustrations ---------- */
+let UID=0;
+const JPATH="M33 7 L42 3 Q50 9 58 3 L67 7 L93 22 L84 42 L73 35 L73 93 Q50 98 27 93 L27 35 L16 42 L7 22 Z";
+function jersey(kind,opts={}){
+  const id="j"+(UID++);let base,acc,pat;
+  if(kind==="rossa"){base="#d6001c";acc="#9e0014";pat="sleeves"}
+  else if(kind==="gialla"){base="#ffd200";acc="#e0b400";pat="sleeves"}
+  else if(kind==="verde"){base="#0a9a55";acc="#067a43";pat="sleeves"}
+  else if(kind==="pois"){base="#fbfbfd";acc="#e2231a";pat="dots"}
+  else if(kind==="neutral"){base="#c5ccd6";acc="#aab3bf";pat="sleeves"}
+  else{const k=KIT[kind]||["#64748b","#ffffff","band"];base=k[0];acc=k[1];pat=k[2]}
+  let p="";
+  switch(pat){
+    case"dots":for(let y=10;y<100;y+=12)for(let x=(y/12%2?4:10);x<100;x+=12)p+=`<circle cx="${x}" cy="${y}" r="3.6" fill="${acc}"/>`;break;
+    case"sleeves":p=`<path d="M7 22 L33 7 L33 20 L16 42 Z M93 22 L67 7 L67 20 L84 42 Z" fill="${acc}"/><rect x="27" y="86" width="46" height="10" fill="${acc}" opacity=".5"/>`;break;
+    case"sash":p=`<path d="M20 20 L36 8 L86 92 L66 98 Z" fill="${acc}"/>`;break;
+    case"band":p=`<rect x="0" y="44" width="100" height="16" fill="${acc}"/><rect x="0" y="64" width="100" height="4" fill="${acc}"/>`;break;
+    case"split":p=`<rect x="50" y="0" width="50" height="100" fill="${acc}"/>`;break;
+    case"hoops":p=[30,48,66,84].map(y=>`<rect x="0" y="${y}" width="100" height="8" fill="${acc}"/>`).join("");break;
+    case"chev":p=`<path d="M0 40 L50 66 L100 40 L100 54 L50 80 L0 54 Z" fill="${acc}"/>`;break;
+    case"stripes":p=[30,42,54,66].map(x=>`<rect x="${x}" y="0" width="5" height="100" fill="${acc}"/>`).join("");break;
+  }
+  return `<svg class="${opts.cls||"j"}" viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="${id}"><path d="${JPATH}"/></clipPath>
+  <linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".16"/><stop offset=".35" stop-color="#fff" stop-opacity=".12"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient></defs>
+  <g clip-path="url(#${id})"><rect width="100" height="100" fill="${base}"/>${p}<rect width="100" height="100" fill="url(#${id}g)"/>
+  <path d="M50 9 L50 93" stroke="#000" stroke-opacity=".18" stroke-width="1.2"/></g>
+  <path d="${JPATH}" fill="none" stroke="#0b1220" stroke-opacity=".28" stroke-width="1.4"/>
+  <path d="M42 3 Q50 13 58 3" fill="none" stroke="#0b1220" stroke-opacity=".35" stroke-width="2"/></svg>`;
+}
+function jkind(j){return j==="gen"?(RACES[RID].lead):j}
+
+/* seeded profile */
+function rng(seed){let s=seed*9301+49297;return()=>{s=(s*9301+49297)%233280;return s/233280}}
+function profilePts(s,N=60){
+  const r=rng(s.n*7+(RID==="tour"?1000:0)+Math.round(s.km));const pts=[];
+  const amp={flat:.12,hilly:.38,medium:.55,mountain:.9,itt:.15}[s.ty];
+  const climbs={flat:0,hilly:5,medium:3,mountain:3,itt:1}[s.ty];
+  const centers=[];for(let c=0;c<climbs;c++)centers.push({x:.12+r()*.8,h:amp*(.45+r()*.55),w:.04+r()*(s.ty==="mountain"?.07:.05)});
+  if(s.top)centers.push({x:1,h:amp*(s.ty==="mountain"?1:.75),w:s.ty==="mountain"?.1:.06});
+  for(let i=0;i<=N;i++){const x=i/N;let y=.08+r()*.03+(s.ty==="flat"?Math.sin(x*9+s.n)*.03:0);
+    centers.forEach(c=>{y+=c.h*Math.exp(-((x-c.x)**2)/(2*c.w*c.w))});pts.push([x,Math.min(y,1)])}
+  return {pts,centers};
+}
+function profileSVG(s,w=320,h=110,opts={}){
+  const id="p"+(UID++);const {pts,centers}=profilePts(s);const pad=opts.mini?1:8, top=opts.mini?2:18, bot=opts.mini?2:20;
+  const X=x=>pad+x*(w-2*pad), Y=y=>h-bot-y*(h-top-bot);
+  const d="M"+pts.map(p=>X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join(" L");
+  const col={flat:"var(--green)",hilly:"#f0a500",medium:"#ef6c1a",mountain:"var(--kom)",itt:"#3b82f6"}[s.ty];
+  if(opts.mini)return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d} L${X(1)} ${h} L${X(0)} ${h} Z" fill="${col}" opacity=".85"/></svg>`;
+  let kom="";centers.filter(c=>c.h>.3&&c.x<.98).forEach(c=>{const x=X(c.x),pi=Math.round(c.x*60),y=Y(pts[pi][1]);kom+=`<g transform="translate(${x.toFixed(1)} ${(y-9).toFixed(1)})"><path d="M-5 4 L0 -5 L5 4 Z" fill="var(--kom)"/></g>`});
+  const fy=Y(pts[pts.length-1][1]);
+  const sky=`<rect width="${w}" height="${h}" fill="url(#${id}s)"/>`;
+  const far=`<path d="M0 ${h-bot-8} Q ${w*.2} ${h-bot-40} ${w*.4} ${h-bot-14} T ${w*.8} ${h-bot-22} T ${w} ${h-bot-10} L${w} ${h} L0 ${h} Z" fill="var(--hill)" opacity=".7"/>`;
+  const ticks=[0,.25,.5,.75,1].map(f=>`<text x="${X(f)}" y="${h-5}" font-size="9" font-family="IBM Plex Mono,monospace" fill="var(--muted)" text-anchor="${f===0?"start":f===1?"end":"middle"}">${Math.round(s.km*f)}</text>`).join("");
+  const flag=`<g transform="translate(${X(1)-1} ${fy})"><path d="M0 0 V-22" stroke="var(--ink)" stroke-width="1.5"/><g transform="translate(0 -22)">${[0,1,2].map(r=>[0,1,2,3].map(c=>`<rect x="${c*3}" y="${r*3}" width="3" height="3" fill="${(r+c)%2?"var(--surface)":"var(--ink)"}"/>`).join("")).join("")}</g></g>`;
+  const clock=s.ty==="itt"?`<g transform="translate(${X(.08)} ${top+4})"><circle r="9" fill="var(--surface)" stroke="#3b82f6" stroke-width="2"/><path d="M0 -5 V0 L4 2" stroke="#3b82f6" stroke-width="2" fill="none" stroke-linecap="round"/></g>`:"";
+  return `<svg class="prof" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(t("ty")[s.ty])}"><defs>
+  <linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sky1)"/><stop offset="1" stop-color="var(--sky2)"/></linearGradient>
+  <linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".95"/><stop offset="1" stop-color="${col}" stop-opacity=".35"/></linearGradient></defs>
+  ${sky}${far}<path d="${d} L${X(1)} ${h-bot} L${X(0)} ${h-bot} Z" fill="url(#${id}f)"/><path d="${d}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/>
+  <line x1="${X(0)}" x2="${X(1)}" y1="${h-bot}" y2="${h-bot}" stroke="var(--line)"/>${kom}${flag}${clock}${ticks}</svg>`;
+}
+function cyclist(color,x,y,sc=1){
+  return `<g transform="translate(${x} ${y}) scale(${sc})"><g class="rider-anim">
+  <circle cx="-14" cy="0" r="9" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="14" cy="0" r="9" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <path d="M-14 0 L-3 0 L8 -12 L-6 -12 Z M8 -12 L14 0 M-3 0 L-8 -16 M8 -12 L9 -16 L13 -16" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-8 -18 Q0 -26 9 -21 L12 -15" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
+  <path d="M-8 -18 L-1 -9 L-3 0" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="12" cy="-26" r="4" fill="${color}" stroke="var(--ink)" stroke-width="1.2"/></g></g>`;
+}
+function icon(n){return{
+ home:'<path d="M3 17h18M5 17l3-6 3 3 4-8 4 11"/><circle cx="15" cy="6" r="1"/>',
+ cls:'<path d="M7 21h10M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>',
+ stg:'<path d="M2 19l5-8 4 4 5-9 6 13z"/><path d="M16 6V2l3 1-3 1"/>',
+ teams:'<path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+ pick:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+ rules:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>'}[n]}
+
+/* ---------- views ---------- */
+function stageTitle(s){return s.a===s.b?esc(s.a):`${esc(s.a)}<span class="arr">›</span>${esc(s.b)}`}
+function stageMeta(s){return `<div class="meta"><span class="chip">${dfmt(s.d)}</span><span class="chip num">${String(s.km).replace(".",",")} ${t("km")}</span><span class="chip k">${t("ty")[s.ty]}</span>${s.top?`<span class="chip">▲ ${t("top")}</span>`:""}</div>`}
+
+function vHome(R,C){
+  if(C.last<0)return vPre(R);
+  const s=R.stages[C.last], nx=R.stages[C.last+1];
+  const rows=C.day[C.last];
+  let win="";
+  if(C.st[C.last]==="ok"&&rows.length){const w=rows.filter(x=>x.gap===0);
+    win=`<div class="win">${jersey(w[0].n,{cls:"j"}).replace('class="j"','class="j" style="width:46px;height:46px"')}<div class="t"><div class="eyebrow">${t("dayWin")}</div><b>${w.map(x=>esc(x.n)).join(", ")}</b><div class="muted" style="font-size:13px">${t("with")} ${[...new Set(w.map(x=>esc(x.rd)))].join(", ")} · <span class="mono">${hms(w[0].tot)}</span></div></div></div>`}
+  const J=["gen","verde","pois"].map(j=>{const sd=standing(C,j);const top=sd.filter(x=>x.pos===sd[0].pos);
+    const v=j==="gen"?gcT(sd[0].v):sd[0].v+" "+t("points");
+    return `<button class="card jc" data-go="cls" data-j="${j}">${jersey(jkind(j))}<div class="lbl">${t(jkind(j))}</div><div class="who">${top.map(x=>esc(x.n)).join(" / ")}</div><div class="val">${v}</div></button>`}).join("");
+  const sd=standing(C,"gen");const p=[sd[1],sd[0],sd[2]];
+  const pod=`<div class="card"><div class="podium">${p.map(x=>`<div class="pod">${jersey(x.n)}<div class="n">${esc(x.n)}</div><div class="g">${x===sd[0]?gcT(x.v):gapT(x.v-sd[0].v)}</div><div class="step">${x.pos}</div></div>`).join("")}</div></div>`;
+  return `
+  <section class="card hero fade">
+    <div class="hd"><div class="stg"><small>${t("stage").toUpperCase()}</small><b>${s.n}</b></div><div style="min-width:0"><div class="eyebrow">${t("after")} ${s.n} ${t("of")} 21 · ${esc(R.name)}</div><h1>${stageTitle(s)}</h1>${stageMeta(s)}</div></div>
+    ${profileSVG(s,340,120)}
+    ${C.st[C.last]==="neu"?`<div class="win"><div class="note" style="flex:1">${t("neutral")}</div></div>`:win}
+  </section>
+  <section><div class="sec-h"><h2>${t("leader")}</h2><span class="eyebrow">${t("after")} ${s.n}</span></div><div class="jrow">${J}</div></section>
+  <section><div class="sec-h"><h2>${t("podium")}</h2><span class="eyebrow">${t(R.lead)}</span></div>${pod}</section>
+  <section><div class="sec-h"><h2>${t("road")}</h2><span class="eyebrow">${C.last+1} ${t("done")} · ${21-C.last-1} ${t("left")}</span></div><div class="card road">${roadSVG(R,C)}</div></section>
+  ${nx?`<section class="card hero"><div class="hd"><div class="stg" style="background:var(--surface2);color:var(--ink)"><small>${t("next").toUpperCase()}</small><b>${nx.n}</b></div><div style="min-width:0"><h1 style="font-size:26px">${stageTitle(nx)}</h1>${stageMeta(nx)}</div></div>${profileSVG(nx,340,100)}</section>`:""}
+  `;
+}
+function roadSVG(R,C){
+  const w=340,h=96,cur=C.last;const X=i=>16+i*(w-32)/20;
+  let path=`M${X(0)} 60`;for(let i=1;i<21;i++){const y=60+Math.sin(i*1.1)*10;path+=` S ${X(i)-6} ${y} ${X(i)} ${y}`}
+  const Yi=i=>i===0?60:60+Math.sin(i*1.1)*10;
+  let dots="";R.stages.forEach((s,i)=>{const st=C.st[i];const f=st==="fut"?"var(--surface)":st==="neu"?"#f0a500":"var(--lead)";
+    dots+=`<g><circle cx="${X(i)}" cy="${Yi(i)}" r="${i===cur?7:5}" fill="${f}" stroke="var(--ink)" stroke-width="1.4"/>${(i%5===0||i===20||i===cur)?`<text x="${X(i)}" y="${Yi(i)+20}" text-anchor="middle" font-size="10" font-weight="700" font-family="Archivo,sans-serif" fill="var(--muted)">${s.n}</text>`:""}</g>`});
+  const rest=[];R.stages.forEach((s,i)=>{if(i&&((new Date(s.d)-new Date(R.stages[i-1].d))/864e5)>1)rest.push(i)});
+  const rd=rest.map(i=>`<g transform="translate(${(X(i)+X(i-1))/2} ${(Yi(i)+Yi(i-1))/2-14})"><rect x="-5" y="-5" width="10" height="10" rx="2" fill="var(--surface2)" stroke="var(--muted)"/><text y="3" text-anchor="middle" font-size="7" font-weight="700" fill="var(--muted)" font-family="Archivo,sans-serif">R</text></g>`).join("");
+  const sd=standing(C,"gen");const lc=(KIT[sd[0].n]||["#d6001c"])[0];
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${t("road")}"><path d="${path}" fill="none" stroke="var(--road)" stroke-width="10" stroke-linecap="round"/><path d="${path}" fill="none" stroke="var(--dash)" stroke-width="1.5" stroke-dasharray="5 6"/>${rd}${dots}${cyclist(R.id==="tour"?"#ffd200":"#d6001c",X(cur)+4,Yi(cur)-12,.75)}</svg>`;
+}
+function vPre(R){
+  const now=new Date(), st=new Date(R.start+"T13:00:00+02:00");let ms=Math.max(0,st-now);
+  const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);
+  const s0=R.stages[0];
+  const J=["gen","verde","pois"].map(j=>`<div class="card jc">${jersey(jkind(j))}<div class="lbl">${t(jkind(j))}</div><div class="who">—</div><div class="val">&nbsp;</div></div>`).join("");
+  const mount=R.stages.filter(s=>s.ty==="mountain").length, itt=R.stages.filter(s=>s.ty==="itt").length, flat=R.stages.filter(s=>s.ty==="flat").length;
+  return `<section class="card hero fade"><div class="hd"><div class="stg"><small>${t("stage").toUpperCase()}</small><b>1</b></div><div style="min-width:0"><div class="eyebrow">${t("grand")} · ${esc(R.name)}</div><h1>${stageTitle(s0)}</h1>${stageMeta(s0)}</div></div>${profileSVG(s0,340,110)}
+  <div class="eyebrow" style="padding:4px 16px 8px">${t("startsIn")}</div><div class="cd"><div><b class="num">${d}</b><small>${t("days")}</small></div><div><b class="num">${h}</b><small>${t("hours")}</small></div><div><b class="num">${m}</b><small>${t("min")}</small></div></div></section>
+  <section><div class="sec-h"><h2>${t("leader")}</h2></div><div class="jrow">${J}</div><p class="note" style="margin:10px 0 0">${t("noRes")}</p></section>
+  <section><div class="sec-h"><h2>${t("road")}</h2><span class="eyebrow">${R.km} ${t("km")}</span></div>
+  <div class="card" style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+   ${[["mountain",mount],["itt",itt],["flat",flat]].map(([k,v])=>`<div>${profileSVG({n:k.length,km:100,ty:k,top:k==="mountain"},120,48,{mini:true}).replace("<svg",'<svg style="width:100%;height:40px"')}<b style="font-family:var(--display);font-style:italic;font-weight:900;font-size:28px;display:block;line-height:1">${v}</b><small class="muted">${t("ty")[k]}</small></div>`).join("")}
+  </div></section>`;
+}
+
+function vCls(R,C){
+  const tabs=["gen","verde","pois"].map(j=>`<button data-j="${j}" aria-pressed="${CJ===j}">${jersey(jkind(j))}<span>${j==="gen"?t("gen"):j==="verde"?t("pts"):t("kom")}</span></button>`).join("");
+  if(C.last<0)return `<div class="tabsJ">${tabs}</div><p class="note">${t("noRes")}</p>`;
+  const sd=standing(C,CJ);const L0=sd[0];
+  const val=x=>CJ==="gen"?(x.pos===1?gcT(x.v):gapT(x.v-L0.v)):x.v;
+  const sub=x=>CJ==="gen"?(x.pos===1?"":gcT(x.v)):(x.pos===1?t("points"):"−"+(L0.v-x.v));
+  const cls=CJ==="gen"?"":CJ;
+  const leaders=sd.filter(x=>x.pos===1);
+  const team=n=>DTS.find(d=>d.n===n).t;
+  const rows=sd.map(x=>`<li class="tap" data-dt="${esc(x.n)}"><div class="pos">${x.pos}</div>${jersey(x.n)}<div class="nm"><b>${esc(x.n)}</b><small>${esc(team(x.n))} · <span class="mv ${x.mv>0?"up":x.mv<0?"dn":"eq"}">${x.mv>0?"▲"+x.mv:x.mv<0?"▼"+(-x.mv):"="}</span></small></div><div class="r">${val(x)}<small>${sub(x)}</small></div></li>`).join("");
+  return `<div class="tabsJ fade">${tabs}</div>
+  <div class="lead-b ${cls}">${jersey(jkind(CJ))}<div class="t"><div class="eyebrow" style="color:inherit;opacity:.8">${t(jkind(CJ))} · ${t("after")} ${C.last+1}</div><h3>${leaders.map(x=>esc(x.n)).join(" / ")}</h3><div class="v">${CJ==="gen"?gcT(L0.v):L0.v+" "+t("points")}</div></div></div>
+  <ul class="card lst">${rows}</ul>
+  <section class="card chart"><div class="sec-h" style="padding:4px 10px 0"><h2 style="font-size:22px">${t("trend")}</h2></div><div class="eyebrow" style="padding:0 10px 6px">${t("trendSub")}</div>
+  <div class="legend">${DTS.map(d=>`<button data-hl="${esc(d.n)}" aria-pressed="${HL===d.n}"><i style="background:${KIT[d.n][0]};box-shadow:inset 0 0 0 2px ${KIT[d.n][1]}"></i>${esc(d.n)}</button>`).join("")}</div>
+  <div class="wrap">${bump(R,C)}</div></section>`;
+}
+function bump(R,C){
+  const idx=[];C.rank[CJ].forEach((r,i)=>{if(r)idx.push(i)});
+  const w=560,h=270,l=26,rgt=86,tp=14,bt=22;const X=k=>l+k*(w-l-rgt)/Math.max(1,idx.length-1),Y=p=>tp+(p-1)*(h-tp-bt)/9;
+  let g="";for(let p=1;p<=10;p++)g+=`<line x1="${l}" x2="${w-rgt}" y1="${Y(p)}" y2="${Y(p)}" stroke="var(--line)"/><text x="${l-8}" y="${Y(p)+3}" text-anchor="end" font-size="10" font-family="IBM Plex Mono,monospace" fill="var(--muted)">${p}</text>`;
+  idx.forEach((i,k)=>{if(k%2===0||k===idx.length-1)g+=`<text x="${X(k)}" y="${h-6}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono,monospace" fill="var(--muted)">T${i+1}</text>`});
+  const lines=DTS.map(d=>{const pts=idx.map((i,k)=>[X(k),Y(C.rank[CJ][i][d.n])]);const on=!HL||HL===d.n;const c=KIT[d.n][0]==="#f5f5f4"?"#94a3b8":KIT[d.n][0];
+    const last=pts[pts.length-1];
+    return {on,svg:`<g opacity="${on?1:.13}"><path d="M${pts.map(p=>p.join(" ")).join(" L")}" fill="none" stroke="${c}" stroke-width="${HL===d.n?4:2.4}" stroke-linejoin="round" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="${HL===d.n?3.6:2.2}" fill="${c}"/>`).join("")}<text x="${last[0]+8}" y="${last[1]+4}" font-size="11" font-weight="700" font-family="Archivo,sans-serif" fill="var(--ink)">${esc(d.n)}</text></g>`}});
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${t("trend")}">${g}${lines.filter(x=>!x.on).map(x=>x.svg).join("")}${lines.filter(x=>x.on).map(x=>x.svg).join("")}</svg>`;
+}
+
+function vStg(R,C){
+  if(SEL==null)SEL=C.last>=0?C.last:0;
+  const strip=R.stages.map((s,i)=>`<button data-s="${i}" aria-pressed="${i===SEL}" aria-label="${t("stage")} ${s.n}"><span class="dot ${C.st[i]==="fut"?"fut":C.st[i]==="neu"?"neu":""}"></span><b>${s.n}</b>${profileSVG(s,60,22,{mini:true})}<small>${dfmt(s.d).replace(/\.$/,"")}</small></button>`).join("");
+  const s=R.stages[SEL], rows=C.day[SEL]||[];
+  let body="";
+  if(C.st[SEL]==="fut")body=futBody(R,SEL);
+  else{
+    const sorted=C.st[SEL]==="ok"?rows:[...rows].sort((a,b)=>(b.g+b.k)-(a.g+a.k));
+    body=(C.st[SEL]==="neu"?`<p class="note">${t("neutral")}</p>`:"")+`<ul class="card lst res">${sorted.map((x,j)=>`<li class="tap" data-dt="${esc(x.n)}"><div class="pos">${C.st[SEL]==="ok"?(sorted.findIndex(y=>y.tot===x.tot)+1):"·"}</div><div class="nm"><b>${esc(x.n)}</b><div class="ln"><span class="rider">${jersey(x.n)}${esc(x.rd)}</span>${x.b?`<span class="tag b">−${x.b}" ${t("bonus")}</span>`:""}${x.pe?`<span class="tag">+${x.pe}" ${t("pen")}</span>`:""}${x.g?`<span class="tag g">${x.g} ${t("pts").toLowerCase()}</span>`:""}${x.k?`<span class="tag k">${x.k} ${t("kom")}</span>`:""}${x.f?`<span class="tag" style="background:rgba(226,35,26,.10);color:var(--kom)">${x.f==="SE"?t("noChoice"):t("retired")}</span>`:""}</div></div><div class="r">${C.st[SEL]==="ok"?(x.gap===0?hms(x.tot):gapT(x.gap)):"—"}${C.st[SEL]==="ok"&&x.gap>0?`<small>${hms(x.tot)}</small>`:""}</div></li>`).join("")}</ul>`;
+  }
+  if(ADMIN&&C.st[SEL]!=="fut"&&RESDB[R.id+"_"+s.n]&&!(R.res[SEL]&&Object.keys(R.res[SEL]).length))body+=`<details class="card" style="padding:4px 0"><summary class="lnk" style="padding:10px 14px;display:block">${t("editRes")}</summary>${resForm(R,SEL)}</details>`;
+  return `<div class="strip" id="strip">${strip}</div>
+  <section class="card hero fade"><div class="hd"><div class="stg"><small>${t("stage").toUpperCase()}</small><b>${s.n}</b></div><div style="min-width:0"><h1>${stageTitle(s)}</h1>${stageMeta(s)}</div></div>${profileSVG(s,340,120)}</section>
+  ${body}`;
+}
+
+function vTeams(R,C){
+  const sd=standing(C,"gen");const ord=C.last>=0?sd.map(x=>x.n):DTS.map(d=>d.n);
+  return `<p class="eyebrow" style="margin:0">${t("tapTeam")}</p><div class="teams fade">${ord.map(n=>{const d=DTS.find(x=>x.n===n);const tt=C.totals[n];const p=sd.find(x=>x.n===n);
+   return `<button class="card tm" data-dt="${esc(n)}">${jersey(n)}<span class="rk">${C.last>=0?p.pos+"°":"–"}</span><b>${esc(d.t)}</b><small>${esc(n)}</small><div class="ic"><span style="background:var(--lead-soft)">${C.last>=0?(p.pos===1?gcT(tt.t).split(" ")[0]:gapT(tt.t-sd[0].v)):"—"}</span><span style="color:var(--green)">${tt.g} P</span><span style="color:var(--kom)">${tt.p} M</span></div>${dups(R,n).length?`<span class="tk">${t("dupT")}</span>`:""}</button>`}).join("")}</div>`;
+}
+
+function vRules(){
+  return `<section class="card rules fade"><h2 style="font-size:28px">${t("rulesT")}</h2>
+  <div class="rule">${cyclistBadge()}<div><h3>${t("r1h")}</h3><p>${t("r1")}</p></div></div>
+  <div class="rule">${jersey(jkind("gen"))}<div><h3>${t("r2h")}</h3><p>${t("r2")}</p></div></div>
+  <div class="formula">${L==="it"?"tempo = arrivo − abbuoni + penalità":"tiempo = llegada − bonificaciones + penalizaciones"}<br>${L==="it"?"generale = Σ tempo (tappe 1–21)":"general = Σ tiempo (etapas 1–21)"}</div>
+  <div class="rule">${jersey("verde")}<div><h3>${t("r3h")}</h3><p>${t("r3")}</p></div></div>
+  <div class="rule">${jersey("pois")}<div><h3>${t("r4h")}</h3><p>${t("r4")}</p></div></div>
+  <div class="rule">${jersey("neutral")}<div><h3>${t("r5h")}</h3><p>${t("r5")}</p></div></div>
+  <p class="muted" style="font-size:12px;margin:0">${t("src")}</p></section>`;
+}
+function cyclistBadge(){return `<svg viewBox="-30 -36 60 50" aria-hidden="true"><circle cx="0" cy="-11" r="24" fill="var(--lead-soft)"/>${cyclist("var(--lead)",0,0,1).replace('class="rider-anim"',"")}</svg>`}
+
+function openDT(n){
+  const R=RACES[RID],C=compute(R);const d=DTS.find(x=>x.n===n);const tt=C.totals[n];
+  const sd=standing(C,"gen");const p=sd.find(x=>x.n===n);
+  const pv=standing(C,"verde").find(x=>x.n===n),pp=standing(C,"pois").find(x=>x.n===n);
+  let best=-1,bp=99;C.day.forEach((rows,i)=>{if(C.st[i]!=="ok")return;const k=rows.findIndex(x=>x.n===n);const pos=rows.findIndex(y=>y.tot===rows[k].tot)+1;if(k>=0&&pos<bp){bp=pos;best=i}});
+  const picks=R.stages.map((s,i)=>{let r=(C.day[i]||[]).find(x=>x.n===n);const pos=r&&C.st[i]==="ok"?C.day[i].findIndex(y=>y.tot===r.tot)+1:null;
+    if(!r){const p=dbPick(R,n,i);if(p)r={rd:isOpen(R,i)&&n!==myDt()?t("hidden"):p,g:0,k:0}}
+    return `<div class="pk ${i===best?"best":""}"><small>${t("stage").toUpperCase()} ${s.n}</small><b>${r?esc(r.rd):t("noPick")}</b><span class="p">${[pos?pos+"°":"",r&&r.g?r.g+"P":"",r&&r.k?r.k+"M":""].filter(Boolean).join(" · ")||"&nbsp;"}</span></div>`}).join("");
+  $("#sh").innerHTML=`<div class="grab"></div><button class="close" id="x" aria-label="Chiudi">✕</button>
+  <div class="sh-hd">${jersey(n)}<div style="min-width:0"><div class="eyebrow">${t("ds")} · ${esc(n)}</div><h2>${esc(d.t)}</h2><div class="muted mono" style="font-size:13px;margin-top:4px">${C.last>=0?gcT(tt.t):""}</div></div></div>
+  <div class="sh-body">
+   <div class="stats"><div class="card stat">${jersey(jkind("gen"))}<b>${C.last>=0?p.pos+"°":"–"}</b><small>${C.last>=0?(p.pos===1?t("leader"):gapT(tt.t-sd[0].v)):""}</small></div>
+   <div class="card stat">${jersey("verde")}<b>${C.last>=0?pv.pos+"°":"–"}</b><small>${tt.g} ${t("points")}</small></div>
+   <div class="card stat">${jersey("pois")}<b>${C.last>=0?pp.pos+"°":"–"}</b><small>${tt.p} ${t("points")}</small></div></div>
+   ${C.last>=0?`<div class="note">${C.wins[n]} ${t("stageWin")}${best>=0?` · ${t("best")}: ${t("stage")} ${best+1} (${bp}°)`:""}</div>`:""}
+   ${dups(R,n).map(x=>`<div class="msg err">${t("dupT")}: ${esc(x.rd)} (${x.st.map(k=>"T"+k).join(", ")})</div>`).join("")}
+   <div class="eyebrow">${t("picks")}</div><div class="picks">${picks}</div></div>`;
+  $("#ov").classList.add("on");$("#sh").classList.add("on");$("#x").onclick=closeDT;$("#x").focus();
+}
+function closeDT(){$("#ov").classList.remove("on");$("#sh").classList.remove("on")}
+
+/* ---------- render ---------- */
+const TABS=["home","pick","cls","stg","teams","rules"];
+/* ---------- picks (db) ---------- */
+let DB=null,ME=null,PK={},DBS="loading",CANW=true,PSEL=null,BUSY=false,MSG=null;
+const norm=x=>String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const lockAt=s=>new Date(s.d+"T12:00:00+02:00");
+function isOpen(R,i){const r=R.res[i];return !(r&&Object.keys(r).length)&&!RESDB[R.id+"_"+R.stages[i].n]&&Date.now()<lockAt(R.stages[i])}
+let RESDB={},ADMIN=false;
+function findR(m,name){const k=norm(name);const e=Object.entries(m||{}).find(([a])=>norm(a)===k);return e?e[1]:null}
+/* stage rows: Excel first; otherwise built from app picks + results entered by the organiser.
+   No pick or rider out => time of the slowest DS of the stage, 0 points (S.E.) */
+function effRes(R){return R.stages.map((s,i)=>{const x=R.res[i];if(x&&Object.keys(x).length)return x;
+  const d=RESDB[R.id+"_"+s.n];if(!d||!d.riders)return null;const rows={};
+  DTS.forEach(dt=>{const p=dbPick(R,dt.n,i);const r=p?findR(d.riders,p):null;
+    if(r&&!r.out&&r.t>0)rows[dt.n]=[p,r.t,r.b||0,r.p||0,r.g||0,r.k||0,""];
+    else rows[dt.n]=[p||"—",0,0,0,r?(r.g||0):0,r?(r.k||0):0,p?"RIT":"SE"]});
+  const ok=Object.values(rows).filter(v=>!v[6]);const worst=ok.length?Math.max(...ok.map(v=>v[1]-v[2]+v[3])):0;
+  Object.values(rows).forEach(v=>{if(v[6])v[1]=worst});return rows})}
+function dups(R,dt){const m={};R.stages.forEach((s,i)=>{const p=pickOf(R,dt,i);if(!p||p==="—")return;const k=norm(p);(m[k]=m[k]||{rd:p,st:[]}).st.push(s.n)});return Object.values(m).filter(x=>x.st.length>1)}
+const parseT=v=>{v=String(v||"").trim();if(!v)return 0;const p=v.split(/[^0-9]+/).filter(Boolean).map(Number);if(!p.length||p.length>3)return NaN;while(p.length<3)p.unshift(0);return p[0]*3600+p[1]*60+p[2]};
+function resForm(R,i){
+  const s=R.stages[i];const riders=[...new Set(DTS.map(d=>dbPick(R,d.n,i)).filter(Boolean))];
+  if(!riders.length)return `<p class="note">${t("future")}</p>`;
+  const cur=(RESDB[R.id+"_"+s.n]||{}).riders||{};
+  return `<form class="pf rf" id="rf" data-i="${i}" autocomplete="off"><label>${t("resT")}</label><p class="muted" style="margin:0;font-size:13px">${t("resSub")}</p>
+  <div class="rgrid"><span></span><small>${t("tArr")}</small><small>${t("bonus")} s</small><small>${t("pen")} s</small><small>${t("pts")}</small><small>${t("kom")}</small><small>${t("rit")}</small>
+  ${riders.map((r,k)=>{const c=findR(cur,r)||{};return `<b data-rn="${esc(r)}">${esc(r)}</b><input id="rt${k}" aria-label="${t("tArr")} ${esc(r)}" placeholder="h:mm:ss" value="${c.t?hms(c.t):""}"><input id="rb${k}" type="number" min="0" value="${c.b||""}"><input id="rp${k}" type="number" min="0" value="${c.p||""}"><input id="rg${k}" type="number" min="0" value="${c.g||""}"><input id="rk${k}" type="number" min="0" value="${c.k||""}"><input id="ro${k}" type="checkbox" ${c.out?"checked":""}>`}).join("")}</div>
+  ${MSG&&MSG[2]==="res"?`<div class="msg ${MSG[0]}">${MSG[1]}</div>`:""}
+  <button class="btn" type="submit" ${BUSY?"disabled":""}>${t("resSave")}</button></form>`;
+}
+async function saveRes(f){
+  const R=RACES[RID],i=+f.dataset.i,s=R.stages[i];const names=[...f.querySelectorAll("[data-rn]")].map(b=>b.dataset.rn);const riders={};
+  for(let k=0;k<names.length;k++){const tv=parseT(f.querySelector("#rt"+k).value),out=f.querySelector("#ro"+k).checked;
+    if(isNaN(tv)||(!out&&!tv)){MSG=["err",t("fmtErr").replace("{r}",esc(names[k])),"res"];render();return}
+    const n=id=>Math.max(0,parseInt(f.querySelector("#"+id+k).value)||0);
+    riders[names[k]]={t:tv,b:n("rb"),p:n("rp"),g:n("rg"),k:n("rk"),out}}
+  BUSY=true;render();
+  try{await DB.collection("results").doc(R.id+"_"+s.n).set({riders,ts:Date.now()});BUSY=false;MSG=["ok",t("resSaved"),"res"]}
+  catch(e){BUSY=false;MSG=["err",t("saveErr"),"res"]}
+  render();
+}
+function ownerOf(dt){let best=null;Object.entries(PK).forEach(([u,d])=>{if(d&&d.dt===dt&&(!best||(d.since||0)<(PK[best].since||0)))best=u});return best}
+function myDt(){const d=PK[ME];return d&&d.dt&&ownerOf(d.dt)===ME?d.dt:null}
+function dbPick(R,dt,i){const u=ownerOf(dt);const v=u&&PK[u]&&PK[u][R.id]&&PK[u][R.id][String(R.stages[i].n)];return v||null}
+function pickOf(R,dt,i){const r=R.res[i];if(r&&r[dt])return r[dt][0];return dbPick(R,dt,i)}
+function usedList(R,dt,except){const o=[];R.stages.forEach((s,i)=>{if(i===except)return;const p=pickOf(R,dt,i);if(p)o.push({n:s.n,rd:p})});return o}
+function riderNames(){const set=new Map();VUELTA_DATA.res.forEach(r=>Object.values(r).forEach(v=>{const k=norm(v[0]);if(k&&!set.has(k))set.set(k,String(v[0]).trim())}));
+  Object.values(PK).forEach(d=>["vuelta","tour"].forEach(k=>Object.values((d&&d[k])||{}).forEach(v=>{const n=norm(v);if(n&&!set.has(n))set.set(n,v)})));
+  return [...set.values()].sort((a,b)=>a.localeCompare(b))}
+function countdown(dt){let ms=Math.max(0,dt-Date.now());const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);return (d?d+"g ":"").replace("g",L==="it"?"g":"d")+h+"h "+String(m).padStart(2,"0")+"m"}
+
+function futBody(R,i){
+  const open=isOpen(R,i), me=myDt();
+  if(open){const n=DTS.filter(d=>dbPick(R,d.n,i)).length;const mine=me&&dbPick(R,me,i);
+    return `<div class="card hero"><div class="win" style="border-top:0"><div class="t"><div class="eyebrow">${t("closesIn")} · ${countdown(lockAt(R.stages[i]))}</div><b>${n}/10 ${t("chose")}</b>${me?`<div class="muted" style="font-size:13px">${t("yourPick")}: <b style="font-size:15px;font-style:normal;font-family:var(--body)">${mine?esc(mine):"—"}</b></div>`:""}</div><button class="btn" data-goPick="${i}">${t("goPick")}</button></div></div><p class="note">${t("lockNote")}</p>`}
+  const any=DTS.some(d=>dbPick(R,d.n,i));
+  if(!any)return `<p class="note">${t("future")}</p>`;
+  const form=ADMIN?`<section class="card">${resForm(R,i)}</section>`:"";
+  return `<div class="eyebrow">${t("revealed")}</div><ul class="card lst res">${DTS.map(d=>{const p=dbPick(R,d.n,i);return `<li class="tap" data-dt="${esc(d.n)}"><div class="pos">·</div><div class="nm"><b>${esc(d.n)}</b><div class="ln"><span class="rider">${jersey(d.n)}${p?esc(p):t("none")}</span></div></div><div class="r"></div></li>`}).join("")}</ul>${form}`;
+}
+
+function vPick(R,C){
+  if(DBS==="loading")return `<p class="note">${t("loading")}</p>`;
+  if(DBS==="off")return `<p class="note">${t("signin")}</p>`;
+  const me=myDt();
+  if(!me){
+    return `<section class="fade"><div class="sec-h"><h2>${t("who")}</h2></div><p class="muted" style="margin:0 0 12px">${t("whoSub")}</p>
+    ${MSG?`<div class="msg ${MSG[0]}" style="margin-bottom:10px">${MSG[1]}</div>`:""}
+    <div class="teams">${DTS.map(d=>{const o=ownerOf(d.n);const tk=o&&o!==ME;return `<button class="card tm" data-claim="${esc(d.n)}" ${tk||!CANW?"disabled":""}>${jersey(d.n)}<b>${esc(d.n)}</b><small>${esc(d.t)}</small>${tk?`<span class="tk">${t("taken")}</span>`:""}</button>`}).join("")}</div></section>`;
+  }
+  const open=R.stages.map((s,i)=>i).filter(i=>isOpen(R,i));
+  const head=`<div class="card me fade">${jersey(me)}<div class="t"><div class="eyebrow">${t("ds")}</div><b>${esc(me)}</b><small class="muted">${esc(DTS.find(d=>d.n===me).t)}</small></div><button class="lnk" data-unclaim="1">${t("change")}</button></div>`;
+  if(!CANW)return head+`<p class="note">${t("readonly")}</p>`;
+  if(!open.length)return head+`<p class="note">${t("noOpen")}</p>`;
+  if(PSEL==null||!open.includes(PSEL))PSEL=open[0];
+  const s=R.stages[PSEL],cur=dbPick(R,me,PSEL);
+  const strip=open.map(i=>{const st=R.stages[i];const has=dbPick(R,me,i);return `<button data-ps="${i}" aria-pressed="${i===PSEL}" aria-label="${t("stage")} ${st.n}">${has?'<span class="ck">✓</span>':""}<b>${st.n}</b>${profileSVG(st,60,22,{mini:true})}<small>${dfmt(st.d).replace(/\.$/,"")}</small></button>`}).join("");
+  const used=usedList(R,me,-1);const dd=dups(R,me);
+  return `${head}<div class="strip">${strip}</div>
+  <section class="card hero fade"><div class="hd"><div class="stg"><small>${t("stage").toUpperCase()}</small><b>${s.n}</b></div><div style="min-width:0"><div class="eyebrow">${t("closesIn")} · ${countdown(lockAt(s))}</div><h1>${stageTitle(s)}</h1>${stageMeta(s)}</div></div>
+  ${profileSVG(s,340,110)}
+  <form class="pf" id="pf" autocomplete="off"><label for="rin">${t("yourPick")}</label>
+   ${cur?`<div class="cur">${jersey(me).replace('class="j"','class="j" style="width:26px;height:26px"')}<span class="muted">${t("nowPick")}:</span><b>${esc(cur)}</b></div>`:""}
+   <div class="row"><input id="rin" name="rin" list="riders" placeholder="${t("ph")}" value="${cur?esc(cur):""}"><button class="btn" type="submit" ${BUSY?"disabled":""}>${t("save")}</button></div>
+   ${MSG?`<div class="msg ${MSG[0]}">${MSG[1]}</div>`:""}
+   ${cur?`<button type="button" class="lnk" style="justify-self:start" data-clear="1">${t("clear")}</button>`:""}
+  </form></section>
+  ${dd.map(x=>`<div class="msg err">${t("dupT")}: ${esc(x.rd)} (${x.st.map(k=>"T"+k).join(", ")})</div>`).join("")}
+  <p class="note" style="margin:0">${t("lockNote")}</p>
+  ${used.length?`<section><div class="eyebrow" style="margin-bottom:8px">${t("used")} (${used.length})</div><div class="used">${used.map(u=>`<span><small>T${u.n}</small>${esc(u.rd)}</span>`).join("")}</div></section>`:""}`;
+}
+async function writeMine(patch,create){
+  if(!DB||BUSY)return false;BUSY=true;render();
+  try{const ref=DB.collection("picks").doc(ME);if(create||!PK[ME])await ref.set(patch);else await ref.update(patch);BUSY=false;return true}
+  catch(e){BUSY=false;MSG=["err",t("saveErr")];render();return false}
+}
+async function claim(dt){MSG=null;const o=ownerOf(dt);if(o&&o!==ME){MSG=["err",t("takenErr")];render();return}
+  const cur=PK[ME]||{};await writeMine({...cur,dt,since:Date.now()},true);render()}
+async function savePick(val){
+  const R=RACES[RID],me=myDt(),s=R.stages[PSEL];val=String(val||"").replace(/\s+/g," ").trim();
+  if(!val){MSG=["err",t("empty")];render();return}
+  if(!isOpen(R,PSEL)){render();return}
+  const dup=usedList(R,me,PSEL).find(u=>norm(u.rd)===norm(val));
+  if(dup){MSG=["err",t("usedErr").replace("{r}",esc(dup.rd)).replace("{n}",dup.n)];render();return}
+  const known=riderNames().find(n=>norm(n)===norm(val));if(known)val=known;
+  if(await writeMine({[R.id]:{[String(s.n)]:val}},false)){MSG=["ok",t("saved")+" · "+esc(val)];render()}
+}
+async function clearPick(){const R=RACES[RID];if(!isOpen(R,PSEL))return;if(await writeMine({[R.id]:{[String(R.stages[PSEL].n)]:""}},false)){MSG=null;render()}}
+(async()=>{
+  try{
+    if(!window.claude||!window.claude.use){DBS="off";render();return}
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user){DBS="off";render();return}
+    ME=await user.id();if(!ME){DBS="off";render();return}
+    try{const c=await user.can("data.write");CANW=c!==false}catch(e){}
+    DB=db;try{ADMIN=(await user.isOwner())||(await user.canEdit())}catch(e){}
+    db.collection("results").onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{if(d.exists)o[d.id]=d.data()});RESDB=o;render()},()=>{});
+    db.collection("picks").onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{if(d.exists)o[d.id]=d.data()});PK=o;DBS="on";render()},()=>{DBS="off";render()});
+  }catch(e){DBS="off";render()}
+})();
+function render(){
+  document.documentElement.dataset.race=RID;document.documentElement.lang=L;
+  ["it","es"].forEach(l=>$("#l-"+l).setAttribute("aria-pressed",L===l));
+  $("#racesw").innerHTML=Object.values(RACES).map(r=>`<button data-race="${r.id}" aria-pressed="${RID===r.id}">${jersey(r.lead==="rossa"?"rossa":"gialla")}<span><b>${esc(r.short)}</b><small>${r.sub}</small></span></button>`).join("");
+  $("#qb").setAttribute("aria-pressed",TAB==="rules");
+  $("#riders").innerHTML=riderNames().map(n=>`<option value="${esc(n)}">`).join("");
+  const inp=document.getElementById("rin"),keep=inp?{v:inp.value,f:document.activeElement===inp,st:PSEL,r:RID}:null;
+  $("#tb").innerHTML=TABS.filter(k=>k!=="rules").map(k=>`<button data-tab="${k}" ${TAB===k?'aria-current="page"':""}><svg viewBox="0 0 24 24" aria-hidden="true">${icon(k)}</svg>${t(k)}</button>`).join("");
+  const R=RACES[RID],C=compute(R);
+  $("#m").innerHTML={home:vHome,pick:vPick,cls:vCls,stg:vStg,teams:vTeams,rules:vRules}[TAB](R,C);
+  const ni=document.getElementById("rin");if(ni&&keep&&keep.st===PSEL&&keep.r===RID){ni.value=keep.v;if(keep.f)ni.focus()}
+  if(TAB==="stg"){const b=document.querySelector('#strip [aria-pressed="true"]');if(b)b.scrollIntoView({inline:"center",block:"nearest"})}
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-l],[data-race],[data-tab],[data-j],[data-s],[data-dt],[data-hl],[data-go],[data-claim],[data-unclaim],[data-ps],[data-clear],[data-gopick]");if(!b||b===document.documentElement)return;
+  if(b.dataset.claim){if(!b.disabled)claim(b.dataset.claim);return}
+  if(b.dataset.unclaim){MSG=null;writeMine({dt:null},false).then(()=>render());return}
+  if(b.dataset.clear){clearPick();return}
+  if(b.dataset.ps){PSEL=+b.dataset.ps;MSG=null;render();return}
+  if(b.dataset.gopick){PSEL=+b.dataset.gopick;MSG=null;TAB="pick";history.replaceState(null,"","#pick");window.scrollTo(0,0);render();return}
+  MSG=null;
+  if(b.dataset.l){L=b.dataset.l;ls.set("fb-l",L)}
+  else if(b.dataset.race){RID=b.dataset.race;ls.set("fb-r",RID);SEL=null;HL=null;PSEL=null}
+  else if(b.dataset.tab){TAB=b.dataset.tab;if(location.hash!=="#"+TAB)history.replaceState(null,"","#"+TAB);window.scrollTo(0,0)}
+  else if(b.dataset.go){TAB=b.dataset.go;if(b.dataset.j)CJ=b.dataset.j;window.scrollTo(0,0)}
+  else if(b.dataset.j){CJ=b.dataset.j}
+  else if(b.dataset.s){SEL=+b.dataset.s}
+  else if(b.dataset.hl){HL=HL===b.dataset.hl?null:b.dataset.hl}
+  else if(b.dataset.dt){openDT(b.dataset.dt);return}
+  render();
+});
+document.addEventListener("submit",e=>{if(e.target.id==="pf"){e.preventDefault();savePick(e.target.rin.value)}else if(e.target.id==="rf"){e.preventDefault();saveRes(e.target)}});
+$("#ov").onclick=closeDT;document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDT()});
+function fromHash(){const h=location.hash.slice(1);if(TABS.includes(h))TAB=h}
+window.addEventListener("hashchange",()=>{fromHash();render()});
+fromHash();render();
+</script>
+
+</body></html>
