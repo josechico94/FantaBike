@@ -22,7 +22,7 @@ Regístrate en el sitio, confirma el email y después ejecuta en el SQL Editor d
 
 ```sql
 update public.profiles set is_admin = true
-  where id = (select id from auth.users where email = 'jose.chico@wospee.com');
+  where id = (select id from auth.users where email = 'joseichico94@gmail.com');
 ```
 
 Como organizador ves todas las elecciones y cargas los resultados de cada etapa desde la pestaña **Etapas**.
